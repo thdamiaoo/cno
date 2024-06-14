@@ -1,0 +1,4 @@
+[submodule "dags/raizenlib"]
+	path = dags/raizenlib
+	url = https://github.com/raizen-analytics-ldt/raizenlib
+	branch = dev
