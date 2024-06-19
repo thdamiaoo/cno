@@ -121,7 +121,7 @@ def run_pipeline(debugging=False):
                 print(df_cno.dtypes)
 
         sufixo = datetime.now().strftime("%Y_%m_%d_%H%M%S")
-        save_to_csv(df_cno, base_path + f"output_files/tbl_fato_cno_{sufixo}.csv")
+        # save_to_csv(df_cno, base_path + f"output_files/tbl_fato_cno_{sufixo}.csv")
 
     except Exception as e:
         raise ("Erro ao gerar base de CNO", e)
