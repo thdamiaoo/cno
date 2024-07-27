@@ -4,9 +4,11 @@ import os
 import sys
 import pandas as pd
 import yaml
-from datetime import datetime
 
-sys.path.insert(0, os.path.abspath("/home/thdamiao/projects/cno/dags/"))
+from datetime import datetime
+from dateutil.relativedelta import relativedelta
+
+sys.path.insert(0, os.path.abspath("app/dags/"))
 
 from cno.modules.tasks.utils import (
     csv_to_pandas,
@@ -18,8 +20,7 @@ from cno.modules.tasks.utils import (
 
 def run_pipeline(debugging=False):
 
-    file_names = ["cno", "cno_areas", "cno_cnaes", "cno_totais", "cno_vinculos"]
-    base_path = "/home/thdamiao/projects/cno/dags/cno/modules/data/"
+    base_path = "/app/dags/cno/modules/data/"
 
     with open(base_path + "translate/translate.yaml", "r") as file:
         data_yaml = yaml.safe_load(file)
@@ -41,6 +42,7 @@ def run_pipeline(debugging=False):
     df_cno_vin_contrib = create_dataframe(data_dict_cno_vinculos_contrib)
 
     dfs = {}
+    file_names = data_yaml["cno"]["nome_arquivos"]
 
     for file_name in file_names:
         path = os.path.join(base_path + "input_files", f"{file_name}.csv")
@@ -120,8 +122,27 @@ def run_pipeline(debugging=False):
                 print(df_cno.shape[0])
                 print(df_cno.dtypes)
 
-        sufixo = datetime.now().strftime("%Y_%m_%d_%H%M%S")
-        # save_to_csv(df_cno, base_path + f"output_files/tbl_fato_cno_{sufixo}.csv")
+        # REGIÕES BRASIL
+        regioes = {
+            "sul": data_yaml["cno"]["regiao"]["sul"],
+            "sudeste": data_yaml["cno"]["regiao"]["sudeste"],
+            "norte": data_yaml["cno"]["regiao"]["norte"],
+            "nordeste": data_yaml["cno"]["regiao"]["nordeste"],
+            "centro_oeste": data_yaml["cno"]["regiao"]["centro_oeste"],
+        }
+
+        data_filtro = (datetime.now() - relativedelta(years=2)).strftime("%Y-%m-%d")
+        print(f"Data filtro: {data_filtro}")
+
+        df_cno = df_cno[df_cno["data_de_inicio"] >= data_filtro]
+
+        for regiao, estados in regioes.items():
+            df_regiao = df_cno[df_cno["estado"].isin(estados)]
+
+            arquivo_csv = base_path + f"output_files/tbl_fato_cno_{regiao}.csv"
+
+            save_to_csv(df_regiao, arquivo_csv)
+            print(f"Arquivo salvo para a região {regiao}: {arquivo_csv}")
 
     except Exception as e:
         raise ("Erro ao gerar base de CNO", e)

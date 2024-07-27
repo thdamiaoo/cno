@@ -7,7 +7,7 @@ import unicodedata
 import subprocess
 import zipfile
 
-sys.path.insert(0, os.path.abspath("/home/thdamiao/projects/cno/dags/"))
+sys.path.insert(0, os.path.abspath("app/dags/"))
 
 
 def csv_to_pandas(path, encoding="iso-8859-1", sep=",", debugging=False):
@@ -16,12 +16,15 @@ def csv_to_pandas(path, encoding="iso-8859-1", sep=",", debugging=False):
 
     Parâmetros:
     - path (str): Caminho para o arquivo CSV.
-    - encoding (str, opcional): Codificação do arquivo CSV (default: "iso-8859-1").
+    - encoding (str, opcional): Codificação do arquivo CSV 
+      (default: "iso-8859-1").
     - sep (str, opcional): Delimitador utilizado no arquivo CSV (default: ",").
-    - debugging (bool, opcional): Se True, imprime as primeiras 10 linhas do DataFrame carregado (default: False).
+    - debugging (bool, opcional): Se True, imprime as primeiras 10 linhas do 
+      DataFrame carregado (default: False).
 
     Retorna:
-    - pandas.DataFrame ou None: DataFrame carregado a partir do arquivo CSV, ou None se ocorrer um erro.
+    - pandas.DataFrame ou None: DataFrame carregado a partir do arquivo CSV, 
+      ou None se ocorrer um erro.
     """
 
     try:
@@ -51,8 +54,9 @@ def remove_accents(input_str):
 
 def rename_columns(df):
     """
-    Renomeia as colunas de um DataFrame pandas para transformá-las em minúsculas
-    e substituir espaços por underscores. Remove também acentos das colunas.
+    Renomeia as colunas de um DataFrame pandas para transformá-las em 
+    minúsculas e substituir espaços por underscores. Remove também 
+    acentos das colunas.
 
     Parâmetros:
     - df (pandas.DataFrame): O DataFrame pandas cujas colunas serão renomeadas.
@@ -84,16 +88,18 @@ def create_dataframe(data_dict: dict) -> pd.DataFrame:
     return pd.DataFrame(data_dict)
 
 
-def save_to_csv(df, file_path, sep=";", encoding="utf-8", index=False):
+def save_to_csv(df, file_path, sep=",", encoding="utf-8", index=False):
     """
     Salva um DataFrame pandas em um arquivo CSV.
 
     Parâmetros:
     - df (pandas.DataFrame): DataFrame a ser salvo.
     - file_path (str): Caminho completo onde o arquivo CSV será salvo.
-    - sep (str, opcional): Delimitador a ser utilizado no arquivo CSV (default: ',').
+    - sep (str, opcional): Delimitador a ser utilizado no arquivo CSV 
+      (default: ',').
     - encoding (str, opcional): Codificação do arquivo CSV (default: 'utf-8').
-    - index (bool, opcional): Se True, inclui o índice do DataFrame no arquivo CSV (default: False).
+    - index (bool, opcional): Se True, inclui o índice do DataFrame no arquivo 
+      CSV (default: False).
     """
     try:
         df.to_csv(file_path, sep=sep, encoding=encoding, index=index)
@@ -102,7 +108,7 @@ def save_to_csv(df, file_path, sep=";", encoding="utf-8", index=False):
         print(f"Erro ao salvar DataFrame em '{file_path}': {e}")
 
 
-def download_and_extract_zip():
+def download_and_extract_zip(output_dir, url):
     """
     Faz o download e extrai o arquivo ZIP do Cadastro Nacional de Obras (CNO)
     da Receita Federal Brasileira.
@@ -111,8 +117,6 @@ def download_and_extract_zip():
     - output_dir (str): Diretório onde o arquivo ZIP será salvo e
     descompactado.
     """
-    output_dir = "/home/thdamiao/projects/cno/dags/cno/modules/data/input_files"
-    url = "https://dadosabertos.rfb.gov.br/CNO/cno.zip"
 
     os.makedirs(output_dir, exist_ok=True)
 
