@@ -8,8 +8,7 @@ import yaml
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
 
-sys.path.insert(0, os.path.abspath("dags/"))
-# sys.path.insert(0, os.path.abspath("app/dags/"))
+sys.path.insert(0, os.path.abspath("app/dags/"))
 
 
 from dags.cno.modules.tasks.utils import (
@@ -22,8 +21,7 @@ from dags.cno.modules.tasks.utils import (
 
 def run_pipeline(debugging=False):
 
-    # base_path = "/app/dags/cno/modules/data/"
-    base_path = "/home/thdamiao/projects/cno/dags/cno/modules/data/"
+    base_path = "/app/dags/cno/modules/data/"
 
     with open(base_path + "translate/translate.yaml", "r") as file:
         data_yaml = yaml.safe_load(file)
@@ -42,7 +40,6 @@ def run_pipeline(debugging=False):
     file_names = data_yaml["cno"]["nome_arquivos"]
 
     for file_name in file_names:
-        # path = os.path.join(base_path + "input_files/", f"{file_name}.csv")
         path = os.path.join(base_path + "input_files/cno/", f"{file_name}.csv")
         print("### File Path:", path)
         df_name = f"df_{file_name}"
