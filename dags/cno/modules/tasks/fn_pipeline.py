@@ -8,9 +8,11 @@ import yaml
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
 
-sys.path.insert(0, os.path.abspath("app/dags/"))
+sys.path.insert(0, os.path.abspath("dags/"))
+# sys.path.insert(0, os.path.abspath("app/dags/"))
 
-from cno.modules.tasks.utils import (
+
+from dags.cno.modules.tasks.utils import (
     csv_to_pandas,
     rename_columns,
     create_dataframe,
@@ -20,32 +22,28 @@ from cno.modules.tasks.utils import (
 
 def run_pipeline(debugging=False):
 
-    base_path = "/app/dags/cno/modules/data/"
+    # base_path = "/app/dags/cno/modules/data/"
+    base_path = "/home/thdamiao/projects/cno/dags/cno/modules/data/"
 
     with open(base_path + "translate/translate.yaml", "r") as file:
         data_yaml = yaml.safe_load(file)
 
     # CARREGA YAML
-    data_dict_cno_qualif_resp = data_yaml["cno"]["cno_qualicicacao_resposavel"][
-        "data_dict"
-    ]
-
-    data_dict_cno_situacao = data_yaml["cno"]["cno_situacao"]["data_dict"]
-
-    data_dict_cno_vinculos_contrib = data_yaml["cno_vinculos"][
-        "cno_vinculos_qualicicacao_contribuinte"
-    ]["data_dict"]
+    qualif_resp = data_yaml["cno"]["qualif_resp"]["data_dict"]
+    situacao = data_yaml["cno"]["cno_situacao"]["data_dict"]
+    vinculos_contrib = data_yaml["cno"]["qualif_contrib"]["data_dict"]
 
     # CRIA DF A PARTIR DO YAML
-    df_qualif_resp = create_dataframe(data_dict_cno_qualif_resp)
-    df_cno_situacao = create_dataframe(data_dict_cno_situacao)
-    df_cno_vin_contrib = create_dataframe(data_dict_cno_vinculos_contrib)
+    df_qualif_resp = create_dataframe(qualif_resp)
+    df_cno_situacao = create_dataframe(situacao)
+    df_cno_vin_contrib = create_dataframe(vinculos_contrib)
 
     dfs = {}
     file_names = data_yaml["cno"]["nome_arquivos"]
 
     for file_name in file_names:
-        path = os.path.join(base_path + "input_files", f"{file_name}.csv")
+        # path = os.path.join(base_path + "input_files/", f"{file_name}.csv")
+        path = os.path.join(base_path + "input_files/cno/", f"{file_name}.csv")
         print("### File Path:", path)
         df_name = f"df_{file_name}"
         df = csv_to_pandas(path)

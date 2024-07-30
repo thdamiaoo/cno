@@ -7,7 +7,8 @@ import unicodedata
 import subprocess
 import zipfile
 
-sys.path.insert(0, os.path.abspath("app/dags/"))
+# sys.path.insert(0, os.path.abspath("app/dags/"))
+sys.path.insert(0, os.path.abspath("/dags"))
 
 
 def csv_to_pandas(path, encoding="iso-8859-1", sep=",", debugging=False):
@@ -121,6 +122,7 @@ def download_and_extract_zip(output_dir, url):
     os.makedirs(output_dir, exist_ok=True)
 
     file_name = url.split("/")[-1]
+    print(f"Nome do arquivo: {file_name}")
     zip_file_path = os.path.join(output_dir, file_name)
 
     try:
