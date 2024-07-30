@@ -1,18 +1,19 @@
 FROM python:3.11.1
 
-WORKDIR /app
-ADD ./dags /app
-RUN apt update
-
-RUN apt install -y tzdata xvfb python3-tk python3-dev gdebi nano vim gcc libsnappy-dev
-RUN pip install --upgrade setuptools
-RUN pip install --upgrade pip
-RUN pip install pandas sqlalchemy psycopg2-binary python-snappy numpy pyyaml
-
 # Definir diretório de trabalho
 WORKDIR /app
 
-# Copiar arquivos do projeto
+# Atualizar pacotes e instalar dependências do sistema
+RUN apt-get update && \
+    apt-get install -y tzdata xvfb python3-tk python3-dev gdebi nano vim gcc libsnappy-dev postgresql-client
+
+# Atualizar setuptools e pip
+RUN pip install --upgrade setuptools pip
+
+# Instalar pacotes Python necessários
+RUN pip install pandas sqlalchemy psycopg2-binary python-snappy numpy pyyaml
+
+# Copiar arquivos do projeto para o contêiner
 COPY . /app
 
 # Comando para rodar o script de ETL

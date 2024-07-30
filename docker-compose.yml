@@ -11,6 +11,8 @@ services:
     volumes:
       - db-data:/var/lib/postgresql/data
       - shared-data:/shared
+    ports:
+      - "5432:5432"
     networks:
       - stream-network
 
@@ -22,6 +24,8 @@ services:
     tty: true
     networks:
       - stream-network
+    ports:
+      - "5000:5000"
     depends_on:
       - db
     environment:
