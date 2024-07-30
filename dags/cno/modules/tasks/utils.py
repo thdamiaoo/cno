@@ -7,8 +7,7 @@ import unicodedata
 import subprocess
 import zipfile
 
-# sys.path.insert(0, os.path.abspath("app/dags/"))
-sys.path.insert(0, os.path.abspath("/dags"))
+sys.path.insert(0, os.path.abspath("app/dags/"))
 
 
 def csv_to_pandas(path, encoding="iso-8859-1", sep=",", debugging=False):
