@@ -1,0 +1,88 @@
+cno:
+  url:
+    - https://dadosabertos.rfb.gov.br/CNO/cno.zip
+  nome_arquivos:
+    - cno
+    - cno_cnaes
+    - cno_vinculos
+    - cno_areas
+  regiao:
+    sul:
+      - SC
+      - PR
+      - RS
+    sudeste:
+      - SP
+      - MG
+      - RJ
+      - ES
+    nordeste:
+      - MA
+      - PI
+      - CE 
+      - RN
+      - PB
+      - PE
+      - AL
+      - SE
+      - BA
+    norte:
+      - AM
+      - PA
+      - AC
+      - RR
+      - RO
+      - AP
+      - TO
+    centro_oeste:
+      - GO
+      - MT
+      - MS
+      - DF
+  cno_qualicicacao_resposavel:
+    data_dict:
+      - 70
+      - 57
+      - 64
+      - 53
+      - 111
+      - 109
+      - 110
+      - Proprietário do Imóvel
+      - Dono da Obra
+      - Incorporador de Construção Civil
+      - Pessoa Jurídica Construtora
+      - Sociedade Líder de Consórcio
+      - Consórcio
+      - Construção em nome coletivo
+  cno_situacao:
+    data_dict:
+      - 1
+      - 2
+      - 3
+      - 14
+      - 15
+      - Nula
+      - Ativa
+      - Suspensa
+      - Paralisada
+      - Encerrada
+
+cno_vinculos:
+  cno_vinculos_qualicicacao_contribuinte:
+    data_dict:
+      - 53
+      - 57
+      - 64
+      - 70
+      - 109
+      - 110
+      - 111
+      - Pessoa Jurídica Construtora
+      - Dono da Obra
+      - Incorporador de Construção Civil
+      - Proprietário do Imóvel
+      - Consórcio
+      - Construção em nome coletivo
+      - Sociedade Líder de Consórcio
+
