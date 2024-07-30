@@ -1,11 +1,14 @@
 cno:
+
   url:
     - https://dadosabertos.rfb.gov.br/CNO/cno.zip
+
   nome_arquivos:
     - cno
     - cno_cnaes
     - cno_vinculos
     - cno_areas
+
   regiao:
     sul:
       - SC
@@ -39,50 +42,52 @@ cno:
       - MT
       - MS
       - DF
-  cno_qualicicacao_resposavel:
+
+  qualif_resp:
     data_dict:
-      - 70
-      - 57
-      - 64
-      - 53
-      - 111
-      - 109
-      - 110
-      - Proprietário do Imóvel
-      - Dono da Obra
-      - Incorporador de Construção Civil
-      - Pessoa Jurídica Construtora
-      - Sociedade Líder de Consórcio
-      - Consórcio
-      - Construção em nome coletivo
+      - qualificacao_do_responsavel: 70
+        descricao_responsavel: "Proprietário do Imóvel"
+      - qualificacao_do_responsavel: 57
+        descricao_responsavel: "Dono da Obra"
+      - qualificacao_do_responsavel: 64
+        descricao_responsavel: "Incorporador de Construção Civil"
+      - qualificacao_do_responsavel: 53
+        descricao_responsavel: "Pessoa Jurídica Construtora"
+      - qualificacao_do_responsavel: 111
+        descricao_responsavel: "Sociedade Líder de Consórcio"
+      - qualificacao_do_responsavel: 109
+        descricao_responsavel: "Consórcio"
+      - qualificacao_do_responsavel: 110
+        descricao_responsavel: "Construção em nome coletivo"        
+  
   cno_situacao:
     data_dict:
-      - 1
-      - 2
-      - 3
-      - 14
-      - 15
-      - Nula
-      - Ativa
-      - Suspensa
-      - Paralisada
-      - Encerrada
+      - situacao: 1
+        descricao: "Nula"
+      - situacao: 2
+        descricao: "Ativa"
+      - situacao: 3
+        descricao: "Suspensa"
+      - situacao: 14
+        descricao: "Paralisada"
+      - situacao: 15
+        descricao: "Encerrada"
 
-cno_vinculos:
-  cno_vinculos_qualicicacao_contribuinte:
+  qualif_contrib:
     data_dict:
-      - 53
-      - 57
-      - 64
-      - 70
-      - 109
-      - 110
-      - 111
-      - Pessoa Jurídica Construtora
-      - Dono da Obra
-      - Incorporador de Construção Civil
-      - Proprietário do Imóvel
-      - Consórcio
-      - Construção em nome coletivo
-      - Sociedade Líder de Consórcio
+      - qualificacao_do_contribuinte: 53
+        descricao_do_contribuinte: "Pessoa Jurídica Construtora"
+      - qualificacao_do_contribuinte: 57
+        descricao_do_contribuinte: "Dono da Obra"
+      - qualificacao_do_contribuinte: 64
+        descricao_do_contribuinte: "Incorporador de Construção Civil"
+      - qualificacao_do_contribuinte: 70
+        descricao_do_contribuinte: "Proprietário do Imóvel"
+      - qualificacao_do_contribuinte: 109
+        descricao_do_contribuinte: "Consórcio"
+      - qualificacao_do_contribuinte: 110
+        descricao_do_contribuinte: "Construção em nome coletivo"
+      - qualificacao_do_contribuinte: 111
+        descricao_do_contribuinte: "Sociedade Líder de Consórcio"
+
 
