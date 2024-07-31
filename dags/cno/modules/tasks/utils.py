@@ -7,6 +7,13 @@ import unicodedata
 import subprocess
 import zipfile
 
+from sqlalchemy import create_engine
+
+DATABASE_URL = "postgresql://user:password@db:5432/cno"
+NOME_TABELA = "tb_fato_cno"
+
+engine = create_engine(DATABASE_URL)
+
 sys.path.insert(0, os.path.abspath("app/dags/"))
 
 
@@ -16,14 +23,14 @@ def csv_to_pandas(path, encoding="iso-8859-1", sep=",", debugging=False):
 
     Parâmetros:
     - path (str): Caminho para o arquivo CSV.
-    - encoding (str, opcional): Codificação do arquivo CSV 
+    - encoding (str, opcional): Codificação do arquivo CSV
       (default: "iso-8859-1").
     - sep (str, opcional): Delimitador utilizado no arquivo CSV (default: ",").
-    - debugging (bool, opcional): Se True, imprime as primeiras 10 linhas do 
+    - debugging (bool, opcional): Se True, imprime as primeiras 10 linhas do
       DataFrame carregado (default: False).
 
     Retorna:
-    - pandas.DataFrame ou None: DataFrame carregado a partir do arquivo CSV, 
+    - pandas.DataFrame ou None: DataFrame carregado a partir do arquivo CSV,
       ou None se ocorrer um erro.
     """
 
@@ -54,8 +61,8 @@ def remove_accents(input_str):
 
 def rename_columns(df):
     """
-    Renomeia as colunas de um DataFrame pandas para transformá-las em 
-    minúsculas e substituir espaços por underscores. Remove também 
+    Renomeia as colunas de um DataFrame pandas para transformá-las em
+    minúsculas e substituir espaços por underscores. Remove também
     acentos das colunas.
 
     Parâmetros:
@@ -95,10 +102,10 @@ def save_to_csv(df, file_path, sep=",", encoding="utf-8", index=False):
     Parâmetros:
     - df (pandas.DataFrame): DataFrame a ser salvo.
     - file_path (str): Caminho completo onde o arquivo CSV será salvo.
-    - sep (str, opcional): Delimitador a ser utilizado no arquivo CSV 
+    - sep (str, opcional): Delimitador a ser utilizado no arquivo CSV
       (default: ',').
     - encoding (str, opcional): Codificação do arquivo CSV (default: 'utf-8').
-    - index (bool, opcional): Se True, inclui o índice do DataFrame no arquivo 
+    - index (bool, opcional): Se True, inclui o índice do DataFrame no arquivo
       CSV (default: False).
     """
     try:
@@ -136,3 +143,29 @@ def download_and_extract_zip(output_dir, url):
         print(f"Arquivo ZIP extraído em: {output_dir}")
     except Exception as e:
         print(f"Erro durante o download ou extração de {url}: {e}")
+
+
+def import_csv_to_db(csv_path, table_name):
+    """
+    Importa dados de um arquivo CSV para uma tabela no banco de dados
+    PostgreSQL.
+    Esta função lê os dados de um arquivo CSV localizado em `csv_path` e os
+    importa para a tabela especificada em `table_name` no banco de dados
+    PostgreSQL conectado através da `engine` SQLAlchemy.
+    Parâmetros:
+    csv_path (str): O caminho para o arquivo CSV a ser importado.
+    table_name (str): O nome da tabela no banco de dados onde os dados
+    serão importados.
+    Exceções:
+    - Se ocorrer um erro durante a leitura do CSV ou a importação dos dados,
+      uma mensagem de erro será impressa.
+    Exemplo:
+    >>> import_csv_to_db('/shared/file1.csv', 'table1')
+    Dados importados para a tabela table1 com sucesso!
+    """
+    try:
+        df = pd.read_csv(csv_path)
+        df.to_sql(table_name, engine, if_exists="replace", index=False)
+        print(f"Dados importados para a tabela {table_name} com sucesso!")
+    except Exception as e:
+        print(f"Erro durante a importação da tabela {table_name} para o DB: {e}")
