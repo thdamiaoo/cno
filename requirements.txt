@@ -1,0 +1,13 @@
+pandas
+sqlalchemy
+psycopg2-binary
+python-snappy
+numpy
+pyyaml
+tzdata
+nano
+vim
+gcc
+libsnappy-dev
+pyarrow
+fastparquet
