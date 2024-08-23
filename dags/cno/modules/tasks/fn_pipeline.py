@@ -22,6 +22,7 @@ from dags.cno.modules.tasks.utils import (
 from dags.cno.modules.tasks.cnpj_utils import (
     processa_csv,
     processa_arquivos_em_diretorio,
+    carregar_dados_parquet,
 )
 
 
@@ -156,61 +157,7 @@ def run_pipeline_cno(debugging=False):
         raise ("Erro ao gerar base de CNO", e)
 
 
-# def run_pipeline_cnpj(debugging=False):
-#     # base_path = "/app/dags/cno/modules/data/"
-#     base_path = "/home/thdamiao/projects/cno/dags/cno/modules/data/"
-
-#     with open(base_path + "translate/translate.yaml", "r") as file:
-#         data_yaml = yaml.safe_load(file)
-
-#     try:
-#         # # TBS EMPRESAS
-#         # cols_tb_empresas = data_yaml["cnpj"]["cols_tb_empresas"]
-#         # diretorio_empresas = os.path.join(base_path, "input_files/cnpj/unzip/empresas/")
-#         # df_empresas = tabelas_para_df(diretorio_empresas, cols_tb_empresas)
-
-#         # if debugging:
-#         #     df_empresas.info()
-
-#         # TBS ESTABELECIMENTOS
-#         cols_tb_estabelecimentos = data_yaml["cnpj"]["cols_tb_estabelecimentos"]
-#         diretorio_estabelecimentos = os.path.join(
-#             base_path, "input_files/cnpj/unzip/estabelecimentos/"
-#         )
-#         df_estabelecimentos = tabelas_para_df(
-#             diretorio_estabelecimentos, cols_tb_estabelecimentos
-#         )
-
-#         if debugging:
-#             df_estabelecimentos.info()
-#             print(df_estabelecimentos.head())
-
-#         # # TBL SOCIOS
-#         # cols_tb_socios = data_yaml["cnpj"]["cols_tb_socios"]
-#         # diretorio_socios = os.path.join(base_path, "input_files/cnpj/unzip/socios/")
-#         # df_socios = tabelas_para_df(diretorio_socios, cols_tb_socios)
-
-#         # if debugging:
-#         #     df_socios.info()
-
-#         print(
-#             "Dados das tabelas de Empresas, Estabelecimentos"
-#             + "e sócios carregados em pandas"
-#         )
-
-#     except Exception as e:
-#         print(f"Erro na carga das tabelas de Empresas: {e}")
-
-#     # print("Inciando construção de tabela FATO")
-
-#     # df_cnpj = df_estabelecimentos.merge(df_socios, on="cnpj_basico", how="left")
-
-#     # if debugging:
-#     #     df_cnpj.info()
-#     #     print(df_cnpj.head())
-
-
-def run_pipeline_cnpj(debugging=True):
+def gera_base_intermediaria_cnpj(debugging=True):
     """
     Executa o pipeline para processar os dados CNPJ.
 
@@ -220,7 +167,7 @@ def run_pipeline_cnpj(debugging=True):
     input_files_path = os.path.join(base_path, "input_files/cnpj/unzip/")
     diretorios = os.listdir(input_files_path)
     # diretorios = ["paises"]
-    
+
     print(f"Diretórios a processar: {diretorios[0]}")
 
     for diretorio in diretorios:
@@ -230,3 +177,41 @@ def run_pipeline_cnpj(debugging=True):
         else:
             print(f"Processando arquivo único: {diretorio}")
             processa_csv(diretorio, debugging)
+
+
+def run_pipeline_cnpj(debugging=False):
+    """
+    Executa o pipeline para processar os dados CNPJ.
+
+    :param debugging: Se True, o pipeline será executado em modo de depuração.
+    """
+    base_path = "/home/thdamiao/projects/cno/dags/cno/modules/data/output_files/cnpj/processados_parquet/"
+
+    estabelecimentos_path = os.path.join(base_path, "estabelecimentos")
+    print("Carregando dados de estabelecimentos ...")
+
+    df_estabelecimentos = carregar_dados_parquet(estabelecimentos_path)
+    
+    colunas_estab = [
+        "cnpj_basico",
+        "cnpj_ordem",
+        "cnpj_dv",
+        "cnae",
+        "cnae_secundario",
+        "tipo_logradouro",
+        "logradouro",
+        "numero",
+        "complemento",
+        "bairro",
+        "cep",
+        "uf",
+        "municipio",
+        "ddd",
+        "telefone",
+        "ddd_2",
+        "telefone_2",
+        "email",
+    ]
+
+    df_estabelecimentos = df_estabelecimentos[colunas_estab]
+    print(df_estabelecimentos.head())

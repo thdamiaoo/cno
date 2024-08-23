@@ -204,6 +204,32 @@ def processa_arquivos_em_diretorio(diretorio, debugging=False):
         print(f"Processando arquivo: {arquivo}")
         tabela = os.path.splitext(arquivo)[0]
 
-        # if diretorio in ["empresas", "estabelecimentos", "socios"]:
-        #     tabela = diretorio
         processa_csv(tabela, debugging)
+
+
+def carregar_dados_parquet(diretorio: str) -> pd.DataFrame:
+    """
+    Lê todos os arquivos Parquet em um diretório e os combina em um único DataFrame.
+
+    :param diretorio: Caminho para o diretório contendo arquivos Parquet.
+    :return: DataFrame contendo todos os dados combinados dos arquivos Parquet.
+    """
+
+    dfs = []
+
+    for arquivo in os.listdir(diretorio):
+        caminho_arquivo = os.path.join(diretorio, arquivo)
+
+        if os.path.isfile(caminho_arquivo) and arquivo.endswith(".parquet"):
+            try:
+                df = pd.read_parquet(caminho_arquivo)
+                dfs.append(df)
+                print(f"Arquivo carregado: {caminho_arquivo}")
+            except Exception as e:
+                print(f"Erro ao carregar {caminho_arquivo}: {e}")
+
+    if dfs:
+        dados_combinados = pd.concat(dfs, ignore_index=True)
+        return dados_combinados
+    else:
+        sys.exit("Nenhum arquivo Parquet encontrado no diretório.")
