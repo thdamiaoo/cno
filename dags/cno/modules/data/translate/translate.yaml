@@ -90,4 +90,132 @@ cno:
       - qualificacao_do_contribuinte: 111
         descricao_do_contribuinte: "Sociedade Líder de Consórcio"
 
+cnpj:
 
+  url:
+    - https://dadosabertos.rfb.gov.br/CNPJ/dados_abertos_cnpj/{data}/{tabela}.zip
+
+  nome_arquivos:
+    - Cnaes
+    - Empresas
+    - Estabelecimentos
+    - Motivos
+    - Municipios
+    - Naturezas
+    - Paises
+    - Qualificacoes
+    - Simples
+    - Socios
+
+  cols_tb_empresas:
+    - cnpj_basico
+    - razao_social
+    - natureza_juridica
+    - qualificacao_do_responsavel
+    - capital_social
+    - porte_da_empresa
+    - ente_federativo_responsavel
+  
+  cols_tb_estabelecimentos:
+    - cnpj_basico
+    - cnpj_ordem
+    - cnpj_dv
+    - matriz_filial
+    - nome_fantasia
+    - situacao_cadastral
+    - data_situacao_cadastral
+    - motivo_situacao_cadastral
+    - cidade_exterior
+    - pais
+    - data_inicio_atividade
+    - cnae
+    - cnae_secundario
+    - tipo_logradouro
+    - logradouro
+    - numero
+    - complemento
+    - bairro
+    - cep
+    - uf
+    - municipio
+    - ddd
+    - telefone
+    - ddd_2
+    - telefone_2
+    - ddd_fax
+    - fax
+    - email
+    - situacao_especial
+    - data_situacao_especial
+  
+  cols_tb_socios:
+    - cnpj_basico
+    - identificador_socio
+    - nome_socio
+    - cnpj_socio
+    - qualificacao_socio
+    - data_entrada_sociedade
+    - pais_socio
+    - representante_legal
+    - nome_representante
+    - qualificacao_representante_legal
+    - faixa_etaria
+
+  schema:
+    tb_empresas:
+      cnpj_basico: str
+      razao_social: str 
+      natureza_juridica: str
+      qualificacao_do_responsavel: str
+      capital_social: float
+      porte_da_empresa: str
+      ente_federativo_responsavel: str
+
+    tb_estabelecimentos:
+      cnpj_basico: str
+      cnpj_ordem: str
+      cnpj_dv: str
+      matriz_filial: str
+      nome_fantasia: str
+      situacao_cadastral: str
+      data_situacao_cadastral: datetime64[ns]
+      motivo_situacao_cadastral: str
+      cidade_exterior: str
+      pais: str
+      data_inicio_atividade: datetime64[ns]
+      cnae: str
+      cnae_secundario: str
+      tipo_logradouro: str
+      logradouro: str
+      numero: int
+      complemento: str
+      bairro: str
+      cep: str
+      uf: str
+      municipio: str
+      ddd: str
+      telefone: str
+      ddd_2: str
+      telefone_2: str
+      ddd_fax: str
+      fax: str
+      email: str
+      situacao_especial: str
+      data_situacao_especial: datetime64[ns]
+
+    tb_socios:
+      cnpj_basico: str
+      identificador_socio: str
+      nome_socio: str
+      cnpj_socio: str
+      qualificacao_socio: str
+      data_entrada_sociedade: datetime64[ns]
+      pais_socio: str
+      representante_legal: str
+      nome_representante: str
+      qualificacao_representante_legal: str
+      faixa_etaria: str
+
+  filter:
+    tb_estabelecimentos:
+      uf: "SP"
