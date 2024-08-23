@@ -1,0 +1,13 @@
+# Ignorar arquivos CSV
+*.csv
+
+# Ignorar arquivos ZIP
+*.zip
+
+# Ignorar arquivos Parquet
+*.parquet
+
+# Ignorar diretórios específicos
+dags/cno/modules/data/input_files/cnpj/arquivos_processados/
+dags/cno/modules/scripts/files_chunk/
+dags/cno/modules/data/output_files/cnpj/processados_parquet/

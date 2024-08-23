@@ -4,6 +4,7 @@ import shutil
 import os
 import yaml
 import sys
+import re
 
 import pandas as pd
 import pyarrow as pa
@@ -71,6 +72,14 @@ def aplica_schema(df: pd.DataFrame, schema: dict) -> pd.DataFrame:
             if column in df.columns:
                 if dtype == "str":
                     df[column] = df[column].astype(str)
+                elif dtype == "int":
+                    df[column] = pd.to_numeric(
+                        df[column], errors="coerce", downcast="integer"
+                    )
+                elif dtype == "float":
+                    df[column] = pd.to_numeric(
+                        df[column], errors="coerce", downcast="float"
+                    )
                 elif dtype == "datetime64[ns]":
                     df[column] = pd.to_datetime(df[column], errors="coerce")
                 else:
@@ -86,6 +95,29 @@ def aplica_schema(df: pd.DataFrame, schema: dict) -> pd.DataFrame:
         return df
     except Exception as e:
         sys.exit(f"Erro ao aplicar o schema: {e}")
+
+
+def filtra_dataframe(df: pd.DataFrame, filtro: dict) -> pd.DataFrame:
+    """
+    Aplica um filtro no DataFrame baseado nas condições fornecidas.
+
+    :param df: DataFrame ao qual o filtro será aplicado.
+    :param filtro: Dicionário contendo as condições de filtragem
+    (nome_coluna: valor_desejado).
+    :return: DataFrame filtrado com base nas condições fornecidas.
+    """
+    try:
+        df_filtrado = df
+
+        for coluna, valor in filtro.items():
+            if coluna in df.columns:
+                df_filtrado = df_filtrado[df_filtrado[coluna] == valor]
+            else:
+                print(f"A coluna '{coluna}' não existe no DataFrame.")
+
+        return df_filtrado
+    except Exception as e:
+        sys.exit(f"Erro ao aplicar o filtro: {e}")
 
 
 def salva_parquet(df: pd.DataFrame, output_path: str):
@@ -117,28 +149,61 @@ def processa_csv(tabela: str, debugging=False) -> pd.DataFrame:
     with open(os.path.join(base_path, "translate/translate.yaml"), "r") as file:
         data_yaml = yaml.safe_load(file)
 
+    if re.search(r"\d", tabela):
+        diretorio = re.sub(r"\d+", "", tabela)
+    else:
+        diretorio = tabela
+
     csv_file_path = os.path.join(
-        base_path, f"input_files/cnpj/unzip/{tabela}/{tabela}5.csv"
+        base_path, f"input_files/cnpj/unzip/{diretorio}/{tabela}.csv"
     )
-    nome_colunas = data_yaml["cnpj"].get(f"cols_tb_{tabela}", [])
-    schema = data_yaml["cnpj"].get(f"tb_{tabela}", {})
+    nome_colunas = data_yaml["cnpj"].get(f"cols_tb_{diretorio}", [])
+    schema = data_yaml["cnpj"]["schema"].get(f"tb_{diretorio}", {})
+    filtro = data_yaml["cnpj"]["filter"].get(f"tb_{diretorio}", {})
+
+    print(f"Nome colunas: {nome_colunas}")
+    print(f"Schema: {schema}")
+    print(f"Filtro: {filtro}")
 
     if not os.path.isfile(csv_file_path):
         raise FileNotFoundError(f"Arquivo CSV não encontrado: {csv_file_path}")
 
     df = le_csv_e_add_cabecalho(csv_file_path, nome_colunas)
     df = aplica_schema(df, schema)
+    df = filtra_dataframe(df, filtro)
 
     output_path = os.path.join(
-        base_path, f"output_files/cnpj/processados_parquet/{tabela}/{tabela}5.parquet"
-    )
-
-    move_para = os.path.join(
-        base_path, f"input_files/cnpj/arquivos_processados/{tabela}/"
+        base_path, f"output_files/cnpj/processados_parquet/{diretorio}/{tabela}.parquet"
     )
 
     salva_parquet(df, output_path)
+
+    move_para = os.path.join(
+        base_path, f"input_files/cnpj/arquivos_processados/{diretorio}/"
+    )
+
     move_arquivo(csv_file_path, move_para)
 
-    # if debugging:
-    print(df.head())
+    print(f"Arquivo {tabela} processado!")
+
+
+def processa_arquivos_em_diretorio(diretorio, debugging=False):
+    """
+    Processa todos os arquivos CSV em um diretório específico.
+
+    :param diretorio: Nome do diretório contendo arquivos CSV.
+    :param debugging: Se True, imprime os DataFrames para depuração.
+    """
+    base_path = "/home/thdamiao/projects/cno/dags/cno/modules/data/"
+    input_dir = os.path.join(base_path, f"input_files/cnpj/unzip/{diretorio}/")
+
+    arquivos = [f for f in os.listdir(input_dir) if f.endswith(".csv")]
+    print(f"Arquivos em '{diretorio}': {arquivos}")
+
+    for arquivo in arquivos:
+        print(f"Processando arquivo: {arquivo}")
+        tabela = os.path.splitext(arquivo)[0]
+
+        # if diretorio in ["empresas", "estabelecimentos", "socios"]:
+        #     tabela = diretorio
+        processa_csv(tabela, debugging)

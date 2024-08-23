@@ -19,7 +19,10 @@ from dags.cno.modules.tasks.utils import (
     save_to_csv,
 )
 
-from dags.cno.modules.tasks.cnpj_utils import processa_csv
+from dags.cno.modules.tasks.cnpj_utils import (
+    processa_csv,
+    processa_arquivos_em_diretorio,
+)
 
 
 def run_pipeline_cno(debugging=False):
@@ -208,4 +211,22 @@ def run_pipeline_cno(debugging=False):
 
 
 def run_pipeline_cnpj(debugging=True):
-    processa_csv("socios")
+    """
+    Executa o pipeline para processar os dados CNPJ.
+
+    :param debugging: Se True, imprime DataFrames para depuração.
+    """
+    base_path = "/home/thdamiao/projects/cno/dags/cno/modules/data/"
+    input_files_path = os.path.join(base_path, "input_files/cnpj/unzip/")
+    diretorios = os.listdir(input_files_path)
+    # diretorios = ["paises"]
+    
+    print(f"Diretórios a processar: {diretorios[0]}")
+
+    for diretorio in diretorios:
+        if diretorio in ["empresas", "estabelecimentos", "socios"]:
+            print(f"Processando diretório: {diretorio}")
+            processa_arquivos_em_diretorio(diretorio, debugging)
+        else:
+            print(f"Processando arquivo único: {diretorio}")
+            processa_csv(diretorio, debugging)

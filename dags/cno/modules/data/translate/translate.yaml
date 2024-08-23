@@ -161,6 +161,35 @@ cnpj:
     - qualificacao_representante_legal
     - faixa_etaria
 
+  cols_tb_paises:
+    - codigo_pais
+    - pais
+
+  cols_tb_simples:
+    - cnpj_basico
+    - opcao_simples
+    - data_opcao_simples
+    - data_exclusao_simples
+    - opcao_mei
+    - data_opcao_mei
+    - data_exclusao_mei
+
+  cols_tb_municipios:
+    - codigo_municipio
+    - municipio
+
+  cols_tb_qualificacoes:
+    - codigo_qualificacao
+    - qualificacao
+
+  cols_naturezas:
+    - codigo_natureza_juridica
+    - natureza_juridica
+
+  cols_cnaes:
+    - codigo_cnae
+    - cnae
+
   schema:
     tb_empresas:
       cnpj_basico: str
@@ -216,6 +245,39 @@ cnpj:
       qualificacao_representante_legal: str
       faixa_etaria: str
 
+    tb_paises:
+      codigo_pais: str 
+      pais: str
+
+    tb_simples:
+      cnpj_basico: str
+      opcao_simples: str
+      data_opcao_simples: datetime64[ns]
+      data_exclusao_simples: datetime64[ns]
+      opcao_mei: str
+      data_opcao_mei: datetime64[ns]
+      data_exclusao_mei: datetime64[ns]
+
+    tb_municipios:
+      codigo_municipio: str 
+      municipio: str
+
+    tb_qualificacoes:
+      codigo_qualificacao: str 
+      qualificacao: str
+
+    tb_naturezas:
+      codigo_natureza_juridica: str 
+      natureza_juridica: str
+
+    tb_cnaes:
+      codigo_cnae: str 
+      cnae: str
+
   filter:
+  
     tb_estabelecimentos:
       uf: "SP"
+
+    tb_paises:
+      codigo_pais: "105"
