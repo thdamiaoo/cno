@@ -35,11 +35,11 @@ pd.set_option("display.max_colwidth", None)
 # base_path = "/app/dags/cno/modules/data/" TO_COMPOSE
 base_path = "/home/thdamiao/projects/cno/dags/cno/modules/data/"
 
+with open(base_path + "translate/translate.yaml", "r") as file:
+    data_yaml = yaml.safe_load(file)
+
 
 def run_pipeline_cno(debugging=False):
-
-    with open(base_path + "translate/translate.yaml", "r") as file:
-        data_yaml = yaml.safe_load(file)
 
     # CARREGA YAML
     qualif_resp = data_yaml["cno"]["qualif_resp"]["data_dict"]
@@ -164,6 +164,7 @@ def run_pipeline_cno(debugging=False):
         raise ("Erro ao gerar base de CNO", e)
 
 
+# ATENÇÃO
 def gera_base_intermediaria_cnpj(debugging=True):
     """
     Executa o pipeline para processar os dados CNPJ.
@@ -198,10 +199,7 @@ def gera_df_cno_estabelecimentos(debugging=False):
         print("Carregando dados de municípios ...")
 
         municipios_path = os.path.join(nova_base_path, "municipios")
-        cols_municipios = [
-            "codigo_municipio",
-            "municipio",
-        ]
+        cols_municipios = data_yaml["cnpj"]["cols_tb_municipios"]
 
         df_municipios = carregar_dados_parquet(municipios_path)
         df_municipios = df_municipios[cols_municipios]
@@ -214,27 +212,7 @@ def gera_df_cno_estabelecimentos(debugging=False):
     try:
         print("Carregando dados de estabelecimentos ...")
         estabelecimentos_path = os.path.join(nova_base_path, "estabelecimentos")
-
-        colunas_estab = [
-            "cnpj_basico",
-            "cnpj_ordem",
-            "cnpj_dv",
-            "cnae",
-            "cnae_secundario",
-            "tipo_logradouro",
-            "logradouro",
-            "numero",
-            "complemento",
-            "bairro",
-            "cep",
-            "uf",
-            "municipio",
-            "ddd",
-            "telefone",
-            "ddd_2",
-            "telefone_2",
-            "email",
-        ]
+        colunas_estab = data_yaml["cnpj"]["cols_tb_estabelecimentos"]
 
         df_estabelecimentos = carregar_dados_parquet(estabelecimentos_path)
         df_estabelecimentos = df_estabelecimentos[colunas_estab]
@@ -264,16 +242,7 @@ def gera_df_cno_estabelecimentos(debugging=False):
     try:
         print("Carregando dados do simples nacional ...")
         simples_path = os.path.join(base_path, "simples")
-
-        colunas_simples = [
-            "cnpj_basico",
-            "opcao_simples",
-            "data_opcao_simples",
-            "data_exclusao_simples",
-            "opcao_mei",
-            "data_opcao_mei",
-            "data_exclusao_mei",
-        ]
+        colunas_simples = data_yaml["cnpj"]["cols_tb_simples"]
 
         df_simples = carregar_dados_parquet(simples_path)
         df_simples = df_simples[colunas_simples]
@@ -307,17 +276,7 @@ def gera_df_cno_empresas(debugging=False):
     try:
         print("Carregando dados de empresas ...")
         empresas_path = os.path.join(nova_base_path, "empresas")
-
-        colunas_empresas = [
-            "cnpj_basico",
-            "razao_social",
-            "codigo_natureza_juridica",
-            "qualificacao_do_responsavel",
-            "capital_social",
-            "porte_da_empresa",
-            "ente_federativo_responsavel",
-        ]
-
+        colunas_empresas = data_yaml["cnpj"]["cols_tb_empresas"]
         df_empresas = carregar_dados_parquet(empresas_path)
         df_empresas = df_empresas[colunas_empresas]
         df_empresas["cnpj_basico"] = df_empresas["cnpj_basico"].astype(str).str.zfill(8)
@@ -364,8 +323,6 @@ def sei_la(debugging=False):
 
     df_cno["cnpj_ordem"] = df_cno["cnpj_ordem"].astype(str).str.zfill(4)
     df_cno["cnpj_dv"] = df_cno["cnpj_dv"].astype(str).str.zfill(2)
-    # print(df_cno.columns)
-    # print(df_cno.head())
 
     try:
         print("Carregando dados de qualificação do responsável ...")
@@ -373,11 +330,7 @@ def sei_la(debugging=False):
             base_path, "output_files/cnpj/processados_parquet/qualificacoes/"
         )
 
-        colunas_qualificacoes = [
-            "codigo_qualificacao",
-            "qualificacao",
-        ]
-
+        colunas_qualificacoes = data_yaml["cnpj"]["cols_tb_qualificacoes"]
         df_qualificacoes = carregar_dados_parquet(qualificacao_path)
         df_qualificacoes = df_qualificacoes[colunas_qualificacoes]
 
@@ -385,8 +338,9 @@ def sei_la(debugging=False):
             print(df_qualificacoes.head(10))
 
     except Exception as e:
-        raise ("Erro ao carregar base de sócios", e)
+        raise ("Erro ao carregar base de qualificação do responsável", e)
 
+    print("Vinculando dados de qualificações ..")
     df_cno = pd.merge(df_cno, df_qualificacoes, on="codigo_qualificacao", how="left")
 
     dataframes = [df_qualificacoes]
