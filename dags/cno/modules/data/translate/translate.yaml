@@ -110,7 +110,7 @@ cnpj:
   cols_tb_empresas:
     - cnpj_basico
     - razao_social
-    - natureza_juridica
+    - codigo_natureza_juridica
     - qualificacao_do_responsavel
     - capital_social
     - porte_da_empresa
@@ -194,7 +194,7 @@ cnpj:
     tb_empresas:
       cnpj_basico: str
       razao_social: str 
-      natureza_juridica: str
+      codigo_natureza_juridica: str
       qualificacao_do_responsavel: str
       capital_social: float
       porte_da_empresa: str
@@ -281,3 +281,41 @@ cnpj:
 
     tb_paises:
       codigo_pais: "105"
+
+    tb_municipios:
+      codigo_municipio: ["6131", "6291", "6875", "7017", "6769", "6639"]
+
+    tb_empresas:
+      codigo_natureza_juridica: [
+        "2011",
+        "2038",
+        "2046",
+        "2054",
+        "2062",
+        "2070",
+        "2089",
+        "2097",
+        "2127",
+        "2135",
+        "2143",
+        "2151",
+        "2160",
+        "2178",
+        "2194",
+        "2216",
+        "2224",
+        "2232",
+        "2240",
+        "2259",
+        "2267",
+        "2275",
+        "2283",
+        "2291",
+        "2305",
+        "2313",
+        "2321",
+        "2330",
+        "2348",
+        "2356",
+        "4014",
+      ]

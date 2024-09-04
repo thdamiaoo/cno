@@ -4,13 +4,13 @@ import os
 import sys
 import pandas as pd
 import yaml
+import gc
 
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
 
 # sys.path.insert(0, os.path.abspath("app/dags/"))
 sys.path.insert(0, os.path.abspath("dags/"))
-
 
 from dags.cno.modules.tasks.utils import (
     csv_to_pandas,
@@ -23,13 +23,20 @@ from dags.cno.modules.tasks.cnpj_utils import (
     processa_csv,
     processa_arquivos_em_diretorio,
     carregar_dados_parquet,
+    aplica_formatacao,
+    salva_parquet,
 )
+
+pd.set_option("display.max_columns", None)
+pd.set_option("display.max_rows", None)
+pd.set_option("display.width", None)
+pd.set_option("display.max_colwidth", None)
+
+# base_path = "/app/dags/cno/modules/data/" TO_COMPOSE
+base_path = "/home/thdamiao/projects/cno/dags/cno/modules/data/"
 
 
 def run_pipeline_cno(debugging=False):
-
-    # base_path = "/app/dags/cno/modules/data/"
-    base_path = "/home/thdamiao/projects/cno/dags/cno/modules/data/"
 
     with open(base_path + "translate/translate.yaml", "r") as file:
         data_yaml = yaml.safe_load(file)
@@ -163,10 +170,10 @@ def gera_base_intermediaria_cnpj(debugging=True):
 
     :param debugging: Se True, imprime DataFrames para depuração.
     """
-    base_path = "/home/thdamiao/projects/cno/dags/cno/modules/data/"
+
     input_files_path = os.path.join(base_path, "input_files/cnpj/unzip/")
     diretorios = os.listdir(input_files_path)
-    # diretorios = ["paises"]
+    # diretorios = ["empresas"]
 
     print(f"Diretórios a processar: {diretorios[0]}")
 
@@ -179,39 +186,212 @@ def gera_base_intermediaria_cnpj(debugging=True):
             processa_csv(diretorio, debugging)
 
 
-def run_pipeline_cnpj(debugging=False):
+def gera_df_cno_estabelecimentos(debugging=False):
     """
     Executa o pipeline para processar os dados CNPJ.
 
     :param debugging: Se True, o pipeline será executado em modo de depuração.
     """
-    base_path = "/home/thdamiao/projects/cno/dags/cno/modules/data/output_files/cnpj/processados_parquet/"
+    nova_base_path = os.path.join(base_path, "output_files/cnpj/processados_parquet/")
 
-    estabelecimentos_path = os.path.join(base_path, "estabelecimentos")
-    print("Carregando dados de estabelecimentos ...")
+    try:
+        print("Carregando dados de municípios ...")
 
+        municipios_path = os.path.join(nova_base_path, "municipios")
+        cols_municipios = [
+            "codigo_municipio",
+            "municipio",
+        ]
+
+        df_municipios = carregar_dados_parquet(municipios_path)
+        df_municipios = df_municipios[cols_municipios]
+        if debugging:
+            print(df_municipios.head(10))
+
+    except Exception as e:
+        raise ("Erro ao carregar base de municípios", e)
+
+    try:
+        print("Carregando dados de estabelecimentos ...")
+        estabelecimentos_path = os.path.join(nova_base_path, "estabelecimentos")
+
+        colunas_estab = [
+            "cnpj_basico",
+            "cnpj_ordem",
+            "cnpj_dv",
+            "cnae",
+            "cnae_secundario",
+            "tipo_logradouro",
+            "logradouro",
+            "numero",
+            "complemento",
+            "bairro",
+            "cep",
+            "uf",
+            "municipio",
+            "ddd",
+            "telefone",
+            "ddd_2",
+            "telefone_2",
+            "email",
+        ]
+
+        df_estabelecimentos = carregar_dados_parquet(estabelecimentos_path)
+        df_estabelecimentos = df_estabelecimentos[colunas_estab]
+        df_estabelecimentos.rename(
+            columns={"municipio": "codigo_municipio"}, inplace=True
+        )
+        # df_estabelecimentos = aplica_formatacao(df_estabelecimentos)
+
+        if debugging:
+            print(df_estabelecimentos.head(10))
+
+    except Exception as e:
+        raise ("Erro ao carregar base de estabelecimentos", e)
+
+    df_cno = pd.merge(
+        df_estabelecimentos, df_municipios, on="codigo_municipio", how="inner"
+    )
+
+    dataframes = [df_estabelecimentos, df_municipios]
+    for df in dataframes:
+        del df
+
+    if debugging:
+        print("Número de linhas", df_cno.shape[0])
+        print(df_cno.head(10))
+
+    try:
+        print("Carregando dados do simples nacional ...")
+        simples_path = os.path.join(base_path, "simples")
+
+        colunas_simples = [
+            "cnpj_basico",
+            "opcao_simples",
+            "data_opcao_simples",
+            "data_exclusao_simples",
+            "opcao_mei",
+            "data_opcao_mei",
+            "data_exclusao_mei",
+        ]
+
+        df_simples = carregar_dados_parquet(simples_path)
+        df_simples = df_simples[colunas_simples]
+
+        if debugging:
+            print(df_simples.head(10))
+
+    except Exception as e:
+        raise ("Erro ao carregar base de empresas", e)
+
+    df_cno = pd.merge(df_cno, df_simples, on="cnpj_basico", how="left")
+
+    del df_simples
+
+    if debugging:
+        print(df_cno.head(10))
+
+    output_path = os.path.join(
+        base_path,
+        "intermediario/estabelecimentos/intermediario.parquet",
+    )
+
+    print("Salva base Estabelecimentos ...")
+    salva_parquet(df_cno, output_path)
+
+
+def gera_df_cno_empresas(debugging=False):
+
+    nova_base_path = os.path.join(base_path, "output_files/cnpj/processados_parquet/")
+
+    try:
+        print("Carregando dados de empresas ...")
+        empresas_path = os.path.join(nova_base_path, "empresas")
+
+        colunas_empresas = [
+            "cnpj_basico",
+            "razao_social",
+            "codigo_natureza_juridica",
+            "qualificacao_do_responsavel",
+            "capital_social",
+            "porte_da_empresa",
+            "ente_federativo_responsavel",
+        ]
+
+        df_empresas = carregar_dados_parquet(empresas_path)
+        df_empresas = df_empresas[colunas_empresas]
+        df_empresas["cnpj_basico"] = df_empresas["cnpj_basico"].astype(str).str.zfill(8)
+        df_empresas.rename(
+            columns={"qualificacao_do_responsavel": "codigo_qualificacao"}, inplace=True
+        )
+
+        if debugging:
+            print(df_empresas.head(10))
+
+        output_path = os.path.join(
+            base_path,
+            "intermediario/empresas/empresas.parquet",
+        )
+
+        print("Salva base Empresas ...")
+        salva_parquet(df_empresas, output_path)
+
+    except Exception as e:
+        raise ("Erro ao salvar base de Empresas", e)
+
+
+def sei_la(debugging=False):
+
+    nova_base_path = os.path.join(
+        base_path, "output_files/cnpj/processados_parquet/intermediario/"
+    )
+
+    estabelecimentos_path = os.path.join(nova_base_path, "estabelecimentos")
     df_estabelecimentos = carregar_dados_parquet(estabelecimentos_path)
-    
-    colunas_estab = [
-        "cnpj_basico",
-        "cnpj_ordem",
-        "cnpj_dv",
-        "cnae",
-        "cnae_secundario",
-        "tipo_logradouro",
-        "logradouro",
-        "numero",
-        "complemento",
-        "bairro",
-        "cep",
-        "uf",
-        "municipio",
-        "ddd",
-        "telefone",
-        "ddd_2",
-        "telefone_2",
-        "email",
-    ]
+    if debugging:
+        print(df_estabelecimentos.head())
 
-    df_estabelecimentos = df_estabelecimentos[colunas_estab]
-    print(df_estabelecimentos.head())
+    empresas_path = os.path.join(nova_base_path, "empresas")
+    df_empresas = carregar_dados_parquet(empresas_path)
+    if debugging:
+        print(df_empresas.head())
+
+    df_cno = pd.merge(df_estabelecimentos, df_empresas, on="cnpj_basico", how="left")
+
+    dataframes = [df_estabelecimentos, df_empresas]
+    for df in dataframes:
+        del df
+
+    df_cno["cnpj_ordem"] = df_cno["cnpj_ordem"].astype(str).str.zfill(4)
+    df_cno["cnpj_dv"] = df_cno["cnpj_dv"].astype(str).str.zfill(2)
+    # print(df_cno.columns)
+    # print(df_cno.head())
+
+    try:
+        print("Carregando dados de qualificação do responsável ...")
+        qualificacao_path = os.path.join(
+            base_path, "output_files/cnpj/processados_parquet/qualificacoes/"
+        )
+
+        colunas_qualificacoes = [
+            "codigo_qualificacao",
+            "qualificacao",
+        ]
+
+        df_qualificacoes = carregar_dados_parquet(qualificacao_path)
+        df_qualificacoes = df_qualificacoes[colunas_qualificacoes]
+
+        if debugging:
+            print(df_qualificacoes.head(10))
+
+    except Exception as e:
+        raise ("Erro ao carregar base de sócios", e)
+
+    df_cno = pd.merge(df_cno, df_qualificacoes, on="codigo_qualificacao", how="left")
+
+    dataframes = [df_qualificacoes]
+    for df in dataframes:
+        del df
+
+    print(df_cno.columns)
+    print(df_cno.head())

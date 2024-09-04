@@ -103,7 +103,7 @@ def filtra_dataframe(df: pd.DataFrame, filtro: dict) -> pd.DataFrame:
 
     :param df: DataFrame ao qual o filtro será aplicado.
     :param filtro: Dicionário contendo as condições de filtragem
-    (nome_coluna: valor_desejado).
+    (nome_coluna: valor_desejado), onde o valor pode ser um único valor ou uma lista de valores.
     :return: DataFrame filtrado com base nas condições fornecidas.
     """
     try:
@@ -111,7 +111,12 @@ def filtra_dataframe(df: pd.DataFrame, filtro: dict) -> pd.DataFrame:
 
         for coluna, valor in filtro.items():
             if coluna in df.columns:
-                df_filtrado = df_filtrado[df_filtrado[coluna] == valor]
+                if isinstance(valor, list):
+                    # Verifica se a coluna contém valores na lista fornecida
+                    df_filtrado = df_filtrado[df_filtrado[coluna].isin(valor)]
+                else:
+                    # Verifica se a coluna contém o valor fornecido
+                    df_filtrado = df_filtrado[df_filtrado[coluna] == valor]
             else:
                 print(f"A coluna '{coluna}' não existe no DataFrame.")
 
@@ -233,3 +238,27 @@ def carregar_dados_parquet(diretorio: str) -> pd.DataFrame:
         return dados_combinados
     else:
         sys.exit("Nenhum arquivo Parquet encontrado no diretório.")
+
+
+def aplica_formatacao(df):
+
+    ligacao = [
+        "de",
+        "do",
+        "da",
+        "dos",
+    ]
+    print("Aplica ajustes de formatação")
+
+    def process_value(value):
+        if isinstance(value, str):
+            value = value.replace(".0", "")
+            words = value.split()
+            capitalized_words = [
+                word.capitalize() if word.lower() not in ligacao else word.lower()
+                for word in words
+            ]
+            return " ".join(capitalized_words)
+        return value
+
+    return df.applymap(process_value)

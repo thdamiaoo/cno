@@ -28,21 +28,27 @@ def dividir_csv_em_chunks(
 
         # Inicializa o índice a partir de 20
         for i, chunk in enumerate(chunk_iter, start=30):
-            parte_path = os.path.join(output_dir, f"estabelecimentos{i}.csv")
+            parte_path = os.path.join(output_dir, f"empresas{i}.csv")
             chunk.to_csv(parte_path, index=False)
             print(f"Arquivo salvo: {parte_path}")
 
     except FileNotFoundError:
         print(f"Erro: O arquivo {input_file_path} não foi encontrado.")
     except PermissionError:
-        print(f"Erro: Permissão negada para acessar {output_dir} \
-            ou salvar arquivos.")
+        print(
+            f"Erro: Permissão negada para acessar {output_dir} \
+            ou salvar arquivos."
+        )
     except Exception as e:
         print(f"Erro inesperado: {e}")
 
 
 if __name__ == "__main__":
-    input_file = "/home/thdamiao/projects/cno/dags/cno/modules/data/input_files/cnpj/arquivos_processados/estabelecimentos/bkp/estabelecimentos1.csv"
+    input_file = (
+        "/home/thdamiao/projects/cno/dags/cno/modules/data/"
+        + "input_files/cnpj/arquivos_processados/empresas/"
+        + "bkp/empresas0.csv"
+    )
     output_directory = (
         "/home/thdamiao/projects/cno/dags/cno/modules/scripts/files_chunk"
     )
